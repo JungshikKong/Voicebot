@@ -82,7 +82,7 @@ def TTS_google(response):
             </audio>
             """
         st.markdown(md, unsafe_allow_html=True,)
-    os.remove(filename)
+    #os.remove(filename)
 
 def TTS_pyttsx3(response):
     e = p.init()
@@ -200,7 +200,7 @@ def main():
             #채팅 시각화를 위한 답변 내용 저장
             now = datetime.now().strftime("%H:%M")
             received_message = ''.join(response.choices[0].message.content)
-            #received_message =received_message.replace(" ", '')
+            received_message =received_message.replace(" ", '')
             st.session_state["chat"] = st.session_state["chat"]+[("bot", now, received_message)]
             
             #채팅 형식으로 시각화하기
