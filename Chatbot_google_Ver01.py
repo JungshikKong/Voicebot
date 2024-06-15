@@ -81,7 +81,7 @@ def TTS_google(response):
             <source src="data:audio/mp3;base64,{b64}" type="audio/mp3">
             </audio>
             """
-        st.markdown(md, unsafe_allow_html=True)
+        st.markdown(md, unsafe_allow_html=True,)
     os.remove(filename)
 
 def TTS_pyttsx3(response):
@@ -146,7 +146,7 @@ def main():
         if st.button(label="초기화"):
             st.session_state["played_intro"] = False
             st.session_state["chat"] = []
-            st.session_state["messages"] = [{"role": "system", "content":  "You are a thoughtful assistant. Respond to all input in 25 words and answer in Korean"}]
+            st.session_state["messages"] = [{"role": "system", "content":  "You are a thoughtful assistant. Respond to all input in 25 words and answer in Korean."}]
             st.session_state["check_reset"] = True
 
     col1, col2 = st.columns(2)
@@ -199,8 +199,9 @@ def main():
             
             #채팅 시각화를 위한 답변 내용 저장
             now = datetime.now().strftime("%H:%M")
-            receivced_message = ' '.join(response.choices[0].message.content)
-            st.session_state["chat"] = st.session_state["chat"]+[("bot", now, receivced_message)]
+            received_message = ''.join(response.choices[0].message.content)
+            #received_message =received_message.replace(" ", '')
+            st.session_state["chat"] = st.session_state["chat"]+[("bot", now, received_message)]
             
             #채팅 형식으로 시각화하기
             for sender, time, message in st.session_state["chat"]:
@@ -212,7 +213,7 @@ def main():
                     st.write("")
 
              # 음성으로 읽어주기
-            TTS_google(receivced_message)
+            TTS_google(received_message)
         else:
             st.session_state["check_reset"] = False
 
