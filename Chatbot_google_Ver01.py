@@ -88,18 +88,18 @@ def TTS_pyttsx3(response):
     e = p.init()
     e.say(response)
     e.runAndWait()
-    
+ 
+def play_intro():
+    intro = "안녕하세요 비서 내품입니다. 무엇을 도와드릴까요?"
+    TTS_google(intro)
+        
 
 def main():
     st.set_page_config(
         page_title="내품당 음성 비서",
         layout="wide"
     )
-    
-    def play_intro():
-        intro = "안녕하세요 비서 내품입니다. 무엇을 도와드릴까요?"
-        TTS_pyttsx3(intro)
-    
+
     # Intro 소리를 한 번만 재생하기 위해 세션 상태 확인 및 설정
     if "played_intro" not in st.session_state:
         st.session_state["played_intro"] = False
@@ -212,7 +212,7 @@ def main():
                     st.write("")
 
              # 음성으로 읽어주기
-            TTS_pyttsx3(receivced_message)
+            TTS_google(receivced_message)
         else:
             st.session_state["check_reset"] = False
 
