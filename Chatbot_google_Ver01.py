@@ -8,6 +8,8 @@ import base64
 import speech_recognition as sr
 import logging
 import pyttsx3 as p
+from pydub import AudioSegment
+from io import BytesIO
 
 # 로깅 설정
 logging.basicConfig(level=logging.DEBUG)
@@ -96,9 +98,8 @@ def main():
     
     def play_intro():
         intro = "안녕하세요 비서 내품입니다. 무엇을 도와드릴까요?"
-        TTS_google(intro)
+        TTS_pyttsx3(intro)
     
-   # Intro 소리를 한 번만 재생하기 위해 세션 상태 확인 및 설정
     # Intro 소리를 한 번만 재생하기 위해 세션 상태 확인 및 설정
     if "played_intro" not in st.session_state:
         st.session_state["played_intro"] = False
@@ -151,27 +152,39 @@ def main():
     col1, col2 = st.columns(2)
     with col1:
         st.subheader("질문하기")
-        audio = audiorecorder("클릭하여 녹음하기", "녹음중...")
-        if (audio.duration_seconds > 0) and (not st.session_state["check_reset"]):
-            #음성 재생
-            st.audio(audio.export().read())
-            
-            #음원 파일에서 텍스트 추출
-            filename = 'input.wav'
-            audio.export(filename, format="wav")
-            question = google_STT_with_File(filename)
-            
-            #채팅을 시각화하기 위해 질문 내용 저장
-            now = datetime.now().strftime("%H:%M")
-            #st.session_state["chat"] = st.session_state["chat"] + [("user", now, ' '.join(question))]
-            st.session_state["chat"] = [("user", now, ' '.join(question))]
-            
-            #GPT 모델에 넢을 프롬프트를 위해 질문 내용 저장
-            st.session_state["messages"] = [{"role": "system", "content":  "You are a thoughtful assistant. Respond to all input in 25 words and answer in Korean"}]
-            st.session_state["messages"] = st.session_state["messages"]+[{"role": "user", "content": ' '.join(question)}]
-            
-            #질문 내용 확인
-            print(st.session_state["messages"])
+        try:
+            audio = audiorecorder("클릭하여 녹음하기", "녹음중...")
+            if (audio.duration_seconds > 0) and (not st.session_state["check_reset"]):
+                #음성 재생
+                st.audio(audio.export().read())
+                
+                # Debug: Ensure audio data is correctly captured
+                audio_data = audio.export().read()
+                if audio_data:
+                    logging.debug("Audio data captured successfully.")
+                else:
+                    logging.error("Failed to capture audio data.")
+                    st.error("Failed to capture audio data.")
+                    return
+
+                #음원 파일에서 텍스트 추출
+                filename = 'input.wav'
+                audio.export(filename, format="wav")
+                question = google_STT_with_File(filename)
+                
+                #채팅을 시각화하기 위해 질문 내용 저장
+                now = datetime.now().strftime("%H:%M")
+                st.session_state["chat"] = [("user", now, ' '.join(question))]
+                
+                #GPT 모델에 넣을 프롬프트를 위해 질문 내용 저장
+                st.session_state["messages"] = [{"role": "system", "content":  "You are a thoughtful assistant. Respond to all input in 25 words and answer in Korean"}]
+                st.session_state["messages"] = st.session_state["messages"]+[{"role": "user", "content": ' '.join(question)}]
+                
+                #질문 내용 확인
+                print(st.session_state["messages"])
+        except Exception as e:
+            st.error(f"Error recording audio: {e}")
+            logging.error(f"Error recording audio: {e}")
 
     with col2:
         st.subheader("질문/답변")
@@ -199,11 +212,9 @@ def main():
                     st.write("")
 
              # 음성으로 읽어주기
-            TTS_google(receivced_message)
+            TTS_pyttsx3(receivced_message)
         else:
             st.session_state["check_reset"] = False
 
 if __name__ == "__main__":
     main()
-
-
