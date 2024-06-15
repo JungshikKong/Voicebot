@@ -96,7 +96,7 @@ def main():
     
     def play_intro():
         intro = "안녕하세요 비서 내품입니다. 무엇을 도와드릴까요?"
-        TTS_pyttsx3(intro)
+        TTS_google(intro)
     
    # Intro 소리를 한 번만 재생하기 위해 세션 상태 확인 및 설정
     # Intro 소리를 한 번만 재생하기 위해 세션 상태 확인 및 설정
@@ -198,7 +198,7 @@ def main():
                     st.write("")
 
              # 음성으로 읽어주기
-            TTS_pyttsx3(response.choices[0].message.content)
+            TTS_google(response.choices[0].message.content)
         else:
             st.session_state["check_reset"] = False
 
