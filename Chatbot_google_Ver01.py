@@ -82,7 +82,7 @@ def TTS_google(response):
             </audio>
             """
         st.markdown(md, unsafe_allow_html=True,)
-    #os.remove(filename)
+    os.remove(filename)
 
 def TTS_pyttsx3(response):
     e = p.init()
