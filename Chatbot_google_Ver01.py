@@ -186,7 +186,8 @@ def main():
             
             #채팅 시각화를 위한 답변 내용 저장
             now = datetime.now().strftime("%H:%M")
-            st.session_state["chat"] = st.session_state["chat"]+[("bot", now, ' '.join(response.choices[0].message.content))]
+            receivced_message = ' '.join(response.choices[0].message.content)
+            st.session_state["chat"] = st.session_state["chat"]+[("bot", now, receivced_message)]
             
             #채팅 형식으로 시각화하기
             for sender, time, message in st.session_state["chat"]:
@@ -198,7 +199,7 @@ def main():
                     st.write("")
 
              # 음성으로 읽어주기
-            TTS_google(response.choices[0].message.content)
+            TTS_google(receivced_message)
         else:
             st.session_state["check_reset"] = False
 
