@@ -171,7 +171,7 @@ def main():
                     st.write("")
 
              # 음성으로 읽어주기
-            TTS_google(received_message)
+            #TTS_google(received_message)
             
     col1, col2 = st.columns(2)
     with col1:
