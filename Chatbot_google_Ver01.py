@@ -149,6 +149,30 @@ def main():
             st.session_state["messages"] = [{"role": "system", "content":  "You are a thoughtful assistant. Respond to all input in 25 words and answer in Korean."}]
             st.session_state["check_reset"] = True
 
+        if st.button("데이터 요약하기"):
+            text = "앞에 우리가 얘기한 사항을 정리해주고 특히 내 혈당값을 얘기했다면 앞에 [혈당:120]처럼 값을 표시해서 정리해줘"
+            st.session_state["messages"] = st.session_state["messages"]+[{"role": "user", "content": text}]
+            client = openai.OpenAI(api_key=st.session_state["OPENAI_API"])
+            model = "gpt-3.5-turbo"
+            response = client.chat.completions.create(model=model, messages=st.session_state["messages"])
+                       
+            #채팅 시각화를 위한 답변 내용 저장
+            now = datetime.now().strftime("%H:%M")
+            received_message = ''.join(response.choices[0].message.content)
+            st.session_state["chat"] = st.session_state["chat"]+[("bot", now, received_message)]
+            
+            #채팅 형식으로 시각화하기
+            for sender, time, message in st.session_state["chat"]:
+                if sender == "user":
+                    st.write(f'<div style="display:flex;align-items:center;"><div style="background-color:#007AFF;color:white;border-radius:12px;padding:8px 12px;margin-right:8px;">{message}</div><div style="font-size:0.8rem;color:gray;">{time}</div></div>', unsafe_allow_html=True)
+                    st.write("")
+                else:
+                    st.write(f'<div style="display:flex;align-items:center;justify-content:flex-end;"><div style="background-color:lightgray;border-radius:12px;padding:8px 12px;margin-left:8px;">{message}</div><div style="font-size:0.8rem;color:gray;">{time}</div></div>', unsafe_allow_html=True)
+                    st.write("")
+
+             # 음성으로 읽어주기
+            TTS_google(received_message)
+            
     col1, col2 = st.columns(2)
     with col1:
         st.subheader("질문하기")
@@ -189,16 +213,20 @@ def main():
     with col2:
         st.subheader("질문/답변")
         print(st.session_state["messages"])
-        if st.button("데이터 요약하기"):
-            text = "앞에 우리가 얘기한 사항을 정리해주고 특히 내 혈당값을 얘기했다면 앞에 [혈당:120]처럼 값을 표시해서 정리해줘"
-            st.session_state["messages"] = st.session_state["messages"]+[{"role": "user", "content": text}]
+
+        if (audio.duration_seconds > 0) and (not st.session_state["check_reset"]):
+            # ChatGPT에게 답변 얻기
             client = openai.OpenAI(api_key=st.session_state["OPENAI_API"])
             model = "gpt-3.5-turbo"
             response = client.chat.completions.create(model=model, messages=st.session_state["messages"])
-                       
+            
+            # GPT 모델에 넣을 프롬프트를 위해 답변 내용 저장
+            st.session_state["message"] = st.session_state["messages"]+[{"role":"system","content":' '.join(response.choices[0].message.content)}]
+            
             #채팅 시각화를 위한 답변 내용 저장
             now = datetime.now().strftime("%H:%M")
             received_message = ''.join(response.choices[0].message.content)
+            #received_message =received_message.replace(" ", '')
             st.session_state["chat"] = st.session_state["chat"]+[("bot", now, received_message)]
             
             #채팅 형식으로 시각화하기
@@ -210,38 +238,10 @@ def main():
                     st.write(f'<div style="display:flex;align-items:center;justify-content:flex-end;"><div style="background-color:lightgray;border-radius:12px;padding:8px 12px;margin-left:8px;">{message}</div><div style="font-size:0.8rem;color:gray;">{time}</div></div>', unsafe_allow_html=True)
                     st.write("")
 
-             # 음성으로 읽어주기
+            # 음성으로 읽어주기
             TTS_google(received_message)
-            
         else:
-            if (audio.duration_seconds > 0) and (not st.session_state["check_reset"]):
-                # ChatGPT에게 답변 얻기
-                client = openai.OpenAI(api_key=st.session_state["OPENAI_API"])
-                model = "gpt-3.5-turbo"
-                response = client.chat.completions.create(model=model, messages=st.session_state["messages"])
-                
-                # GPT 모델에 넣을 프롬프트를 위해 답변 내용 저장
-                st.session_state["message"] = st.session_state["messages"]+[{"role":"system","content":' '.join(response.choices[0].message.content)}]
-                
-                #채팅 시각화를 위한 답변 내용 저장
-                now = datetime.now().strftime("%H:%M")
-                received_message = ''.join(response.choices[0].message.content)
-                #received_message =received_message.replace(" ", '')
-                st.session_state["chat"] = st.session_state["chat"]+[("bot", now, received_message)]
-                
-                #채팅 형식으로 시각화하기
-                for sender, time, message in st.session_state["chat"]:
-                    if sender == "user":
-                        st.write(f'<div style="display:flex;align-items:center;"><div style="background-color:#007AFF;color:white;border-radius:12px;padding:8px 12px;margin-right:8px;">{message}</div><div style="font-size:0.8rem;color:gray;">{time}</div></div>', unsafe_allow_html=True)
-                        st.write("")
-                    else:
-                        st.write(f'<div style="display:flex;align-items:center;justify-content:flex-end;"><div style="background-color:lightgray;border-radius:12px;padding:8px 12px;margin-left:8px;">{message}</div><div style="font-size:0.8rem;color:gray;">{time}</div></div>', unsafe_allow_html=True)
-                        st.write("")
-
-                # 음성으로 읽어주기
-                TTS_google(received_message)
-            else:
-                st.session_state["check_reset"] = False
+            st.session_state["check_reset"] = False
 
 if __name__ == "__main__":
     main()
