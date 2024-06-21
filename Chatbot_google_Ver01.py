@@ -150,7 +150,7 @@ def main():
             st.session_state["check_reset"] = True
 
         if st.button("데이터 요약하기"):
-            text = "앞에 우리가 얘기한 사항을 정리해주고 특히 내 혈당값을 얘기했다면 앞에 [혈당:120]처럼 값을 표시해서 정리해줘"
+            text = "앞에 내용을 정리해줘. 내 혈당값을 얘기했다면 '오늘날짜의 혈당값은 100 입니다.' 처럼 맨 먼저 얘기해주고 나머지 얘기를 요약 정리해줘"
             st.session_state["messages"] = st.session_state["messages"]+[{"role": "user", "content": text}]
             client = openai.OpenAI(api_key=st.session_state["OPENAI_API"])
             model = "gpt-3.5-turbo"
